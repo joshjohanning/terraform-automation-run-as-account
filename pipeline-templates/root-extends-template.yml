@@ -1,0 +1,38 @@
+parameters:
+- name: buildSteps # the name of the parameter is buildSteps
+  type: stepList # data type is StepList
+  default: [] # default value of buildSteps
+- name: buildJobs # the name of the parameter is buildSteps
+  type: jobList # data type is StepList
+  default: [] # default value of buildSteps
+- name: deployStages
+  type: stageList
+  default: [] 
+- name: 'buildStageName'
+  type: string
+  default: 'build'
+
+# resources:
+#   repositories:
+#   - repository: secretscanning
+#     type: github
+#     name: org/secret-scanning-config
+#     endpoint: org
+
+stages:
+- stage: ${{ parameters.buildStageName }}
+  displayName: ${{ parameters.buildStageName }}
+  jobs:
+  - job: secret_scanning
+    pool:
+      vmImage: windows-latest
+      
+    steps:
+
+    # - template: secret-scanning/secret-scanning-steps.yml
+
+    - ${{ parameters.buildSteps }}
+
+  - ${{ parameters.buildJobs }}
+
+- ${{ parameters.deployStages }}

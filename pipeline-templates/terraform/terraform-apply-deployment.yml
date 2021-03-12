@@ -1,0 +1,30 @@
+parameters:
+  workspace: ''         # terraform workspace, likely dev, qa, or prod
+  environment: ''
+  azureSubscription: ''
+  rootFolder: '$(Build.SourcesDirectory)'   # specify what folder the terraform code is in
+  artifactName: 'plan-'                     # want to use plan-$env
+  pool: 
+    vmImage: 'ubuntu-latest'
+
+jobs:
+- deployment: apply
+  displayName: Terraform Apply
+  pool: ${{ parameters.pool }}
+  environment: ${{ parameters.environment }}
+  strategy:
+    runOnce:
+      deploy:
+        steps:
+        - checkout: self
+        - download: current
+          artifact: ${{ parameters.artifactName }}
+        - template: get-tf-credentials.steps.yml
+          parameters:
+            azureSubscription: ${{ parameters.azureSubscription }}
+        - script: |
+            terraform init -input=false
+            terraform workspace select ${{ parameters.workspace }}
+            terraform apply -input=false -auto-approve $(Pipeline.Workspace)/${{ parameters.artifactName }}/out.plan
+          displayName: Terraform Apply
+          workingDirectory: ${{ parameters.rootFolder }}

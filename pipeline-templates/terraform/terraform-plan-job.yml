@@ -1,0 +1,26 @@
+parameters:
+  workspace: ''         # terraform workspace, likely dev, qa, or prod
+  additionalVars: ''
+  varFile: ''
+  azureSubscription: ''
+  rootFolder: '$(Build.SourcesDirectory)'
+  artifactName: 'plan-'  # want to use plan-$env
+  pool: 
+    vmImage: 'ubuntu-latest'
+
+jobs:
+- job: plan
+  displayName: Terraform Plan
+  pool: ${{ parameters.pool }}
+  steps:
+  - template: get-tf-credentials.steps.yml
+    parameters:
+      azureSubscription: ${{ parameters.azureSubscription }}
+  - script: |
+      terraform init -input=false
+      terraform workspace select ${{ parameters.workspace }}
+      terraform plan -input=false -var-file=${{ parameters.varFile }} ${{ parameters.additionalVars }} -out="$(Build.ArtifactStagingDirectory)/out.plan"
+    workingDirectory: ${{ parameters.rootFolder }}
+    displayName: Terraform Plan
+  - publish: $(Build.ArtifactStagingDirectory)/out.plan
+    artifact: ${{ parameters.artifactName }}

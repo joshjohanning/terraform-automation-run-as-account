@@ -1,0 +1,15 @@
+#  Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# certs
+*.pfx
+*.crt
+*.key
+*.pem
+
+# mac
+*.DS_Store

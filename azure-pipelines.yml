@@ -1,0 +1,61 @@
+trigger:
+- main
+
+extends:
+  template: pipeline-templates/root-extends-template.yml
+  parameters:
+    buildStageName: 'secret_scanning' # name of the secret scanning job, A-Z, a-z, 0-9, and underscore
+    deployStages:
+      # DEV
+      - stage: plandev
+        displayName: Plan DEV
+        variables:
+        - name: environment
+          value: dev
+        jobs:
+        - template: pipeline-templates/terraform/terraform-plan-job.yml
+          parameters:
+            azureSubscription: 'Visual Studio Enterprise 1(4abc8ce7-bfa6-4312-89c7-2bc8c34eb820)'
+            workspace: $(environment)
+            varFile: 'terraform.$(environment).tfvars'
+            artifactName: plan-$(environment)
+      - stage: applydev
+        displayName: Apply DEV
+        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+        variables:
+        - name: environment
+          value: dev
+        jobs:
+        - template: pipeline-templates/terraform/terraform-apply-deployment.yml
+          parameters:
+            environment: 'Automation-Account-Terraform-Dev'
+            azureSubscription: 'Visual Studio Enterprise 1(4abc8ce7-bfa6-4312-89c7-2bc8c34eb820)'
+            workspace: '$(environment)'
+            artifactName: plan-$(environment)
+      
+      # PROD
+      - stage: planprod
+        displayName: Plan PROD
+        variables:
+        - name: environment
+          value: prod
+        jobs:
+        - template: pipeline-templates/terraform/terraform-plan-job.yml
+          parameters:
+            azureSubscription: 'Visual Studio Enterprise 1(4abc8ce7-bfa6-4312-89c7-2bc8c34eb820)'
+            workspace: '$(environment)'
+            varFile: 'terraform.$(environment).tfvars'
+            artifactName: plan-$(environment)
+      - stage: applyprod
+        displayName: Apply PROD
+        condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+        variables:
+        - name: environment
+          value: prod
+        jobs:
+        - template: pipeline-templates/terraform/terraform-apply-deployment.yml
+          parameters:
+            environment: 'Automation-Account-EDW-Terraform-Prod'
+            azureSubscription: 'Visual Studio Enterprise 1(4abc8ce7-bfa6-4312-89c7-2bc8c34eb820)'
+            workspace: '$(environment)'
+            artifactName: plan-$(environment)

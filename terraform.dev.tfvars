@@ -1,0 +1,1 @@
+key_vault_access_policy_azure_pipelines_spn = "7baf642a-bdae-4d28-971e-9e53ed44b35b"
