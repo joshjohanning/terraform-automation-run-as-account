@@ -15,7 +15,7 @@ resource "azurerm_key_vault_access_policy" "azure_pipelines" {
   key_vault_id = azurerm_key_vault.secrets_keyvault.id
 
   tenant_id = data.azurerm_subscription.primary.tenant_id
-  object_id = var.key_vault_access_policy_azure_pipelines_spn
+  object_id = data.azuread_service_principal.azure_pipelines.id
 
   secret_permissions = [
     "Get",

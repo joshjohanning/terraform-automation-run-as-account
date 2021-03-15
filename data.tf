@@ -18,3 +18,8 @@ data "azurerm_key_vault_certificate_data" "certificate" {
   name         = azurerm_key_vault_certificate.certificate.name
   key_vault_id = azurerm_key_vault.secrets_keyvault.id
 }
+
+# azure pipelines service principal
+data "azuread_service_principal" "azure_pipelines" {
+  display_name = "jjohanning0798-PartsUnlimited-4abc8ce7-bfa6-4312-89c7-2bc8c34eb820"
+}
